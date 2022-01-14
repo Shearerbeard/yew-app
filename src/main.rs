@@ -74,8 +74,10 @@ impl Component for TodoApp {
             <div>
                 <h1>{ "Hello World!" }</h1>
                 <button onclick={link.callback(|_| Msg::MakeReq)}></button>
-            { todo_list.into_iter().map(|_| {
-                html! { <p>{ "1" }</p> }
+            { todo_list.into_iter().map(|todo| {
+                let id_str = todo.id.to_string();
+
+                html! { <p id={ id_str }>{ todo.title }</p> }
             }).collect::<Html>() }
             </div>
         }
