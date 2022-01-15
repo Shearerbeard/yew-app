@@ -1,8 +1,10 @@
 
 
+mod todo;
+
 use reqwasm::http::{Request};
 use serde::Deserialize;
-use yew::{Component, html, Html};
+use yew::{Component, html, Html, classes};
 
 struct TodoApp {
     // link: ComponentLink<Self>,
@@ -39,6 +41,7 @@ impl Component for TodoApp {
         match msg {
             Msg::MakeReq => {
                 let link = ctx.link().clone();
+                self.todos = None;
 
                 wasm_bindgen_futures::spawn_local(async move {
                     let req = Request::get("https://jsonplaceholder.typicode.com/todos");
@@ -63,22 +66,17 @@ impl Component for TodoApp {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> Html {
-        let link = ctx.link();
-
-        let todo_list = match &self.todos {
-            Some(todos) => todos.clone(),
-            None => vec![]
-        };
+        let todos = self.todos.clone();
+        let cb = ctx.link().callback(|_| Msg::MakeReq);
 
         html! {
             <div>
-                <h1>{ "Hello World!" }</h1>
-                <button onclick={link.callback(|_| Msg::MakeReq)}></button>
-            { todo_list.into_iter().map(|todo| {
-                let id_str = todo.id.to_string();
-
-                html! { <p id={ id_str }>{ todo.title }</p> }
-            }).collect::<Html>() }
+                <div class={ classes!("refresh") }>
+                    <button onclick={cb.clone()}>
+                        { "Refresh" }
+                    </button>
+                </div>
+                <todo::list::List todos={ todos.clone() }/>
             </div>
         }
     }
