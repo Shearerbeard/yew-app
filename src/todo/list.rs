@@ -1,48 +1,35 @@
 use yew::{Component, html, Html, classes, Properties};
 
-use crate::Todo;
+use crate::{Todo};
 
 
-#[derive(Properties, Clone, PartialEq)]
+pub struct  List;
+
+
+#[derive(Properties, PartialEq)]
 pub struct Props {
-    pub todos: Option<Vec<Todo>>,
+    pub todos: Option<Vec<Todo>>
 }
-
-
-pub struct  List {
-    pub props: Props,
-}
-
-pub enum  Msg {}
 
 impl Component for List {
     type Properties = Props;
-    type Message = Msg;
+    type Message = ();
 
-    fn view(&self, _ctx: &yew::Context<Self>) -> Html {
+    fn view(&self, ctx: &yew::Context<Self>) -> Html {
+
         html! {
             <div>
-                { self.render_list(&self.props.todos) }
+                { self.render_list(&ctx.props().todos) }
             </div>
         }
     }
 
     fn create(_ctx: &yew::Context<Self>) -> Self {
-
-        let props = Props {
-            todos: None
-        };
-
-        Self { props }
+        Self
     }
 
     fn update(&mut self, _ctx: &yew::Context<Self>, _msg: Self::Message) -> bool {
        true
-    }
-
-    fn changed(&mut self, ctx: &yew::Context<Self>) -> bool {
-        self.props = ctx.props().clone();
-        true
     }
 }
 

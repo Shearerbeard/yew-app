@@ -1,15 +1,16 @@
 
 
 mod todo;
+mod pages;
 
 use reqwasm::http::{Request};
 use serde::Deserialize;
-use yew::{Component, html, Html, classes};
+use yew::{Component, html, Html, classes, Callback, ContextProvider, MouseEvent};
+use yew_router::prelude::*;
 
+#[derive(Clone, PartialEq)]
 struct TodoApp {
-    // link: ComponentLink<Self>,
     todos: Option<Vec<Todo>>,
-    // fetch_task: Option<FetchTask>,
 }
 
 #[derive(Deserialize, Clone, PartialEq, Debug)]
@@ -21,9 +22,45 @@ pub struct Todo {
     pub completed: bool
 }
 
+
+#[derive(Clone, Routable, PartialEq)]
+pub enum AppRoute {
+    #[at("/todo/:id")]
+    Detail { id: String },
+    #[at("/")]
+    Home,
+}
+
 enum Msg {
     MakeReq,
     Resp(Result<Vec<Todo>, reqwasm::Error>),
+}
+
+fn switch(routes: &AppRoute) -> Html {
+    match routes.clone() {
+        AppRoute::Home => {
+            html! {
+                <h1>{ "Home" }</h1>
+            }
+            // html! {
+            //     <div>
+            //         <div class={ classes!("refresh") }>
+            //     </div>
+            //         <todo::list::List todos={ todos.clone() }/>
+            //     </div>
+            // }
+        }
+        AppRoute::Detail { id } => {
+            html! {
+                <h1>{ "Todo" }</h1>
+            }
+            // html! {
+            //     <div>
+            //         <todo::detail::Detail todo_id={ id }/>
+            //     </div>
+            // }
+        }
+    }
 }
 
 impl Component for TodoApp {
@@ -32,6 +69,7 @@ impl Component for TodoApp {
 
     fn create(ctx: &yew::Context<Self>) -> Self {
         ctx.link().send_message(Msg::MakeReq);
+
         Self {
             todos: None,
         }
@@ -60,24 +98,24 @@ impl Component for TodoApp {
                 } else {
                     false
                 }
-
             }
         }
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> Html {
-        let todos = self.todos.clone();
-        let cb = ctx.link().callback(|_| Msg::MakeReq);
-
         html! {
-            <div>
-                <div class={ classes!("refresh") }>
-                    <button onclick={cb.clone()}>
-                        { "Refresh" }
-                    </button>
+            <ContextProvider<TodoApp> context={self.clone()} >
+                <div class={ classes!("todo") }>
+                    <div class={ classes!("nav")}>
+                        <Link<AppRoute> to={ AppRoute::Home}>{"Home"}</Link<AppRoute>>
+                    </div>
+                    <div class={ classes!("content")}>
+                        <BrowserRouter>
+                            <Switch<AppRoute> render={Switch::render(switch)} />
+                        </BrowserRouter>
+                    </div>
                 </div>
-                <todo::list::List todos={ todos.clone() }/>
-            </div>
+            </ ContextProvider<TodoApp>>
         }
     }
 }
