@@ -1,11 +1,11 @@
 use yew::{function_component, html, use_context, classes};
 
-use crate::{TodoApp, todo};
+use crate::{todo, TodoContext};
 
 
 #[function_component(Home)]
-fn home() -> Html {
-    let app_ctx = use_context::<TodoApp>().expect("Todo Context");
+pub fn home() -> Html {
+    let app_ctx = use_context::<TodoContext>().expect("Todo Context");
     let onclick = app_ctx.refresh;
 
     html! {

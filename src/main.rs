@@ -13,6 +13,12 @@ struct TodoApp {
     todos: Option<Vec<Todo>>,
 }
 
+#[derive(Clone, PartialEq)]
+struct TodoContext {
+    todos: Option<Vec<Todo>>,
+    refresh: Callback<MouseEvent>
+}
+
 #[derive(Deserialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Todo {
@@ -40,25 +46,16 @@ fn switch(routes: &AppRoute) -> Html {
     match routes.clone() {
         AppRoute::Home => {
             html! {
-                <h1>{ "Home" }</h1>
+               <pages::home::Home />
             }
-            // html! {
-            //     <div>
-            //         <div class={ classes!("refresh") }>
-            //     </div>
-            //         <todo::list::List todos={ todos.clone() }/>
-            //     </div>
-            // }
         }
         AppRoute::Detail { id } => {
+            let mut title: String = "Detail".to_owned();
+            title.push_str(&id);
+
             html! {
-                <h1>{ "Todo" }</h1>
+                <h1>{ title }</h1>
             }
-            // html! {
-            //     <div>
-            //         <todo::detail::Detail todo_id={ id }/>
-            //     </div>
-            // }
         }
     }
 }
@@ -103,8 +100,17 @@ impl Component for TodoApp {
     }
 
     fn view(&self, ctx: &yew::Context<Self>) -> Html {
+
+        let cb: Callback<MouseEvent> = ctx.link()
+            .callback(|_event: MouseEvent| Msg::MakeReq);
+
+        let todo_ctx = TodoContext {
+            todos: self.todos.clone(),
+            refresh: cb,
+        };
+
         html! {
-            <ContextProvider<TodoApp> context={self.clone()} >
+            <ContextProvider<TodoContext> context={todo_ctx}>
                 <div class={ classes!("todo") }>
                     <div class={ classes!("nav")}>
                         <Link<AppRoute> to={ AppRoute::Home}>{"Home"}</Link<AppRoute>>
@@ -115,7 +121,7 @@ impl Component for TodoApp {
                         </BrowserRouter>
                     </div>
                 </div>
-            </ ContextProvider<TodoApp>>
+            </ ContextProvider<TodoContext>>
         }
     }
 }
